@@ -1,8 +1,7 @@
-// import TIM from 'tim-wx-sdk';
-// import COS from "cos-wx-sdk-v5";
-
-// import toast from './toast'
-// import Taro from '@tarojs/taro'
+/**
+ * 消息类型 buying-购买消息 guiding-讲解消息 coming-来了消息 like-点赞消息 text-文本消息
+ */
+type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'text'
 
 class TIM {
 	/**
@@ -13,18 +12,57 @@ class TIM {
 	 * TIM sdk
 	 */
   TIM: any
-
 	/**
-	 * tim是否初始化完成
+	 * TIM是否初始化完成
 	 */
   TIM_READY: boolean
-
+	/**
+	 * 昵称
+	 */
+  nickName: string
 	/**
 	 * 群组id
 	 */
   groupId: string
-
+	/**
+	 * toast类
+	 */
+  toast: {
+		/**
+		 * text 错误提示
+		 */
+    show: (text: string) => void
+		/**
+		 * text 加载提示文字
+		 */
+    loading: (text: string) => void
+  }
+	/**
+	 * 初始化
+	 * @param config 配置对象
+	 */
   init(config: {
+		/**
+		 * toast类
+		 */
+    toast: {
+			/**
+			 * text 错误提示
+			 */
+      show: (text: string) => void
+			/**
+			 * text 加载提示文字
+			 */
+      loading: (text: string) => void
+    }
+		/**
+		 * 用户昵称
+		 */
+    nickName: string
+		/**
+		 * tim sdk appid
+		 */
+    SDKAPPID: number
 		/**
 		 * TIM Sdk
 		 */
@@ -61,11 +99,16 @@ class TIM {
 		 * 收到新消息回调
 		 */
     onMessageReceived?: Function
-    onKickedOut?: Function
+		/**
+		 * 被踢掉线时的处理
+		 */
+    onKickedOut: Function
   }) {
     const {
+      SDKAPPID,
       TIM_SDK,
       COS,
+      nickName,
       userId,
       userSig,
       onReady,
@@ -74,14 +117,17 @@ class TIM {
       onMessageReceived,
       groupId,
       onKickedOut,
+      toast
     } = config
 
     this.TIM_READY = false
+    this.nickName = nickName
+    this.toast = toast
 
     console.log('进入 tim sdk初始化')
 
     const options = {
-      SDKAppID: APP_CONF.TIM_APPID, // 接入时需要将0替换为您的即时通信 IM 应用的 SDKAppID
+      SDKAppID: SDKAPPID, // 接入时需要将0替换为您的即时通信 IM 应用的 SDKAppID
     }
     // 创建 SDK 实例，`TIM.create()`方法对于同一个 `SDKAppID` 只会返回同一份实例
     const tim = TIM_SDK.create(options) // SDK 实例通常用 tim 表示
@@ -91,7 +137,7 @@ class TIM {
     this.groupId = groupId
 
     // 设置 SDK 日志输出级别，详细分级请参见 setLogLevel 接口的说明
-    tim.setLogLevel(0) // 普通级别，日志量较多，接入时建议使用
+    tim.setLogLevel(1) // 普通级别，日志量较多，接入时建议使用
     // tim.setLogLevel(1); // release 级别，SDK 输出关键信息，生产环境时建议使用
 
     // 注册 COS SDK 插件
@@ -122,35 +168,16 @@ class TIM {
 				/**
 				 * 过滤消息类型 只抛出自定义消息和文本消息
 				 */
-        if (['TIMCustomElem'].includes(element.type)) {
+        if (['TIMTextElem', 'TIMCustomElem'].includes(element.type)) {
           msgList.push({
             ID: element.ID,
             clientSequence: element.clientSequence,
             nick: element.nick,
-            payload: {
-              ...element.payload,
-              extension: JSON.parse(element.payload.extension),
-            },
-            type: element.type,
-          })
-        } else if (element.type === 'TIMTextElem') {
-          const textSplitRes = element.payload.text.split('m&=&m')
-          msgList.push({
-            ID: element.ID,
-            clientSequence: element.clientSequence,
-            nick: element.nick,
-            payload: {
-              ...element.payload,
-              extension: {
-                text: textSplitRes[1],
-                nickName: textSplitRes[0],
-              },
-            },
+            payload: element.payload,
             type: element.type,
           })
         }
       })
-
       if (this.TIM_READY) {
         onMessageReceived && onMessageReceived(msgList)
       }
@@ -177,14 +204,29 @@ class TIM {
       console.log('CONVERSATION_LIST_UPDATED', event)
 
       const msgList: any = []
-      
+      // event.data.forEach(element => {
+      // 	/**
+      // 	 * 过滤消息类型 只抛出自定义消息和文本消息
+      // 	 */
+      // 	if (['TIMTextElem', 'TIMCustomElem'].includes(element.type)) {
+      // 		msgList.push({
+      // 			ID: element.ID,
+      // 			clientSequence: element.clientSequence,
+      // 			nick: element.nick,
+      // 			payload: element.payload,
+      // 			type: element.type,
+      // 		})
+      // 	}
+      // })
+
       // 过滤字段
       event.data.forEach(element => {
 				/**
-				 * 只抛出自定义消息
+				 * 只抛出自定义和文本消息
 				 */
         if (element.lastMessage.type === 'TIMCustomElem') {
           msgList.push({
+            groupProfile: element.groupProfile || null,
             lastMessage: {
               ...element.lastMessage,
               payload: {
@@ -193,10 +235,33 @@ class TIM {
               },
             },
           })
+        } else if (element.lastMessage.type === 'TIMTextElem') {
+          const textSplitRes = element.lastMessage.payload.text.split('m&=&m')
+          console.log('分割结果', textSplitRes)
+          msgList.push({
+            groupProfile: element.groupProfile || null,
+            lastMessage: {
+              ...element.lastMessage,
+              payload: {
+                extension: {
+                  text: textSplitRes[1],
+                  nickName: textSplitRes[0],
+                },
+              },
+            },
+          })
         }
       })
 
-      onConversationListUpdated && onConversationListUpdated(msgList)
+      console.log('CONVERSATION_LIST_UPDATED监听过滤之后的数据', msgList)
+      if (this.TIM_READY) {
+        msgList &&
+          msgList.length &&
+          onConversationListUpdated &&
+          onConversationListUpdated(msgList)
+      } else {
+        console.warn('收到消息但TIM未初始化成功')
+      }
     })
 
     tim.on(this.TIM.EVENT.GROUP_LIST_UPDATED, event => {
@@ -227,7 +292,7 @@ class TIM {
       // event.data.code - 错误码
       // event.data.message - 错误信息
       console.log('ERROR', event)
-      // toast.show(`聊天室错误: ${event.data.code} - ${event.data.message}`)
+      toast.show(`聊天室错误: ${event.data.code} - ${event.data.message}`)
     })
 
     tim.on(this.TIM.EVENT.SDK_NOT_READY, event => {
@@ -244,14 +309,9 @@ class TIM {
       //    - TIM.TYPES.KICKED_OUT_MULT_ACCOUNT 多实例登录被踢
       //    - TIM.TYPES.KICKED_OUT_MULT_DEVICE 多终端登录被踢
       //    - TIM.TYPES.KICKED_OUT_USERSIG_EXPIRED 签名过期被踢 （v2.4.0起支持）。
-      console.log('被踢掉线，即将主动调用登录', event)
+      console.log('KICKED_OUT', event)
       // toast.show(`您已被踢掉线，原因：${event.data.type}`)
       onKickedOut && onKickedOut()
-
-      // this.login({
-      // 	userId,
-      // 	userSig,
-      // })
     })
 
     tim.on(this.TIM.EVENT.NET_STATE_CHANGE, event => {
@@ -263,58 +323,32 @@ class TIM {
       //    \- TIM.TYPES.NET_STATE_DISCONNECTED - 未接入网络。接入侧可根据此状态提示“当前网络不可用”。SDK 仍会继续重试，若用户网络恢复，SDK 会自动同步消息
       console.log('NET_STATE_CHANGE', event)
       if (event.data.state === TIM.TYPES.NET_STATE_CONNECTED) {
-        // toast.show('网络已连接')
+        toast.show('网络已连接')
       } else if (event.data.state === TIM.TYPES.NET_STATE_CONNECTING) {
-        // toast.loading('当前网络不稳定，连接中...')
+        toast.loading('当前网络不稳定，连接中...')
       } else if (event.data.state === TIM.TYPES.NET_STATE_DISCONNECTED) {
-        // toast.show('当前网络不可用，请检查您的网络')
+        toast.show('当前网络不可用，请检查您的网络')
       }
     })
 
-    this.login({
-      userId,
-      userSig,
-    })
-  }
-
-  login({userId, userSig}) {
     // 开始登录
-    const promise = this.tim.login({userID: userId, userSig: userSig})
+    const promise = tim.login({userID: userId, userSig: userSig})
     promise
       .then(imResponse => {
         console.log('tim登录成功', imResponse.data) // 登录成功
         if (imResponse.data.repeatLogin === true) {
           // 标识账号已登录，本次登录操作为重复登录。v2.5.1 起支持
-          console.log(
-            'tim重复登录, 即将主动调用登出后登录',
-            imResponse.data.errorInfo
-          )
-          this.logOut().then(() => {
-            this.login({
-              userId,
-              userSig,
-            })
-          })
+          console.log('tim重复登录', imResponse.data.errorInfo)
+
+          this.TIM_READY = true
+
+          onReady && onReady()
         }
       })
       .catch(imError => {
-        // toast.show(`TIM登录失败: ${imError}`)
+        toast.show(`TIM登录失败: ${imError}`)
         console.warn('login error:', imError) // 登录失败的相关信息
       })
-  }
-
-  logOut() {
-    return new Promise(resolve => {
-      const promise = this.tim.logout()
-      promise
-        .then(imResponse => {
-          console.log(imResponse.data) // 登出成功
-          resolve()
-        })
-        .catch(imError => {
-          console.warn('logout error:', imError)
-        })
-    })
   }
 
 	/**
@@ -323,6 +357,7 @@ class TIM {
   joinGroup() {
     return new Promise((resolve, reject) => {
       // const { groupId } = params
+      console.log('即将加群', this.groupId)
       const promise = this.tim.joinGroup({
         groupID: this.groupId,
         type: this.TIM.TYPES.GRP_AVCHATROOM,
@@ -371,6 +406,7 @@ class TIM {
         })
         .catch(imError => {
           console.warn('getGroupProfile error:', imError) // 获取群详细资料失败的相关信息
+          this.toast.show(`获取群资料失败: ${imError}`)
           reject(imError)
         })
     })
@@ -399,14 +435,14 @@ class TIM {
 			 * 消息内容的容器
 			 */
       payload: {
-        // /**
-        //  * 消息文本内容 可选 type为text时必传
-        //  */
-        // text?: string
+				/**
+				 * 消息文本内容 可选 type为text时必传
+				 */
+        text?: string
 				/**
 				 * 自定义消息类型 可选 type为custom时必传
 				 */
-        data?: 'buying' | 'guiding' | 'text'
+        data?: IMsgType
 				/**
 				 * 自定义消息详细数据 可选 type为custom时必传
 				 */
@@ -414,8 +450,17 @@ class TIM {
       }
     }
   }) {
-    const {options} = params
+    const {options, type} = params
     console.log('options.payload.extension', options.payload.extension)
+    if (type === 'text') {
+      return this.tim.createTextMessage({
+        to: this.groupId,
+        payload: {
+          text: options.payload.text,
+        },
+        conversationType: this.TIM.TYPES.CONV_GROUP,
+      })
+    }
     return this.tim.createCustomMessage({
       ...options,
       to: this.groupId,
@@ -424,11 +469,11 @@ class TIM {
         description: `${options.payload.data} message`,
         extension: JSON.stringify({
           ...options.payload.extension,
-          nickName: wx.getStorageSync('liveStaffMpUserNickName'),
+          nickName: this.nickName,
 					/**
 					 * 是否主播标识 true-是 false-否
 					 */
-          isAnchor: true,
+          isAnchor: false,
         }),
       },
       conversationType: this.TIM.TYPES.CONV_GROUP,
@@ -445,14 +490,12 @@ class TIM {
     text: string
   }) {
     const {text} = options
+    const nickName = this.nickName
     return this.createMsg({
-      type: 'custom',
+      type: 'text',
       options: {
         payload: {
-          data: 'text',
-          extension: {
-            text,
-          },
+          text: `${nickName}m&=&m${text}`,
         },
       },
     })
@@ -463,25 +506,25 @@ class TIM {
 	 */
   createCustomMsg(options: {
 		/**
-		 * 消息接收方的 userID 或 groupID
-		 */
-    to: string
-		/**
 		 * 消息内容的容器
 		 */
     payload: {
 			/**
-			 * type 自定义消息类型
+			 * type 自定义消息类型 buying-购买 guiding-讲解 coming-来了 text-普通文本消息
 			 */
-      data: 'buying' | 'guiding' | 'text'
+      data: IMsgType
 			/**
-			 *
+			 * 自定义扩展字段
 			 */
-      extension: {
+      extension?: {
 				/**
 				 * 商品信息对象 type为guiding时必传
 				 */
         goodsInfo?: any
+				/**
+				 * 文本内容 type为text时必传
+				 */
+        text: string
       }
     }
   }) {
@@ -509,12 +552,24 @@ class TIM {
         .catch(imError => {
           // 发送失败
           console.warn('sendMessage error:', imError)
-          console.error('into send msg error', imError)
-          this.joinGroup().then(() => {
-            this.sendMsg(message)
-          })
-          reject(imError)
+          reject(JSON.stringify(imError))
         })
+    })
+  }
+
+	/**
+	 * 创建点赞消息并发送
+	 */
+  like() {
+    return new Promise((resolve) => {
+      const likeMsg = this.createCustomMsg({
+        payload: {
+          data: 'like'
+        }
+      })
+      this.sendMsg(likeMsg).then(() => {
+        resolve()
+      })
     })
   }
 }
