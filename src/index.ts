@@ -177,21 +177,7 @@ class TIM {
       console.log('CONVERSATION_LIST_UPDATED', event)
 
       const msgList: any = []
-      // event.data.forEach(element => {
-      // 	/**
-      // 	 * 过滤消息类型 只抛出自定义消息和文本消息
-      // 	 */
-      // 	if (['TIMTextElem', 'TIMCustomElem'].includes(element.type)) {
-      // 		msgList.push({
-      // 			ID: element.ID,
-      // 			clientSequence: element.clientSequence,
-      // 			nick: element.nick,
-      // 			payload: element.payload,
-      // 			type: element.type,
-      // 		})
-      // 	}
-      // })
-
+      
       // 过滤字段
       event.data.forEach(element => {
 				/**
