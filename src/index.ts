@@ -1,7 +1,7 @@
 /**
  * 消息类型 buying-购买消息 guiding-讲解消息 coming-来了消息 like-点赞消息 text-文本消息
  */
-type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'text'
+type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'posterShowStatus' | 'text'
 
 class TIM {
 	/**
@@ -168,16 +168,35 @@ class TIM {
 				/**
 				 * 过滤消息类型 只抛出自定义消息和文本消息
 				 */
-        if (['TIMTextElem', 'TIMCustomElem'].includes(element.type)) {
+        if (['TIMCustomElem'].includes(element.type)) {
           msgList.push({
             ID: element.ID,
             clientSequence: element.clientSequence,
             nick: element.nick,
-            payload: element.payload,
+            payload: {
+              ...element.payload,
+              extension: JSON.parse(element.payload.extension),
+            },
+            type: element.type,
+          })
+        } else if (element.type === 'TIMTextElem') {
+          const textSplitRes = element.payload.text.split('m&=&m')
+          msgList.push({
+            ID: element.ID,
+            clientSequence: element.clientSequence,
+            nick: element.nick,
+            payload: {
+              ...element.payload,
+              extension: {
+                text: textSplitRes[1],
+                nickName: textSplitRes[0],
+              },
+            },
             type: element.type,
           })
         }
       })
+
       if (this.TIM_READY) {
         onMessageReceived && onMessageReceived(msgList)
       }
@@ -406,7 +425,7 @@ class TIM {
         })
         .catch(imError => {
           console.warn('getGroupProfile error:', imError) // 获取群详细资料失败的相关信息
-          this.toast.show(`获取群资料失败: ${imError}`)
+          // this.toast.show(`获取群资料失败: ${imError}`)
           reject(imError)
         })
     })
@@ -510,7 +529,7 @@ class TIM {
 		 */
     payload: {
 			/**
-			 * type 自定义消息类型 buying-购买 guiding-讲解 coming-来了 text-普通文本消息
+			 * 自定义消息类型
 			 */
       data: IMsgType
 			/**
@@ -524,7 +543,11 @@ class TIM {
 				/**
 				 * 文本内容 type为text时必传
 				 */
-        text: string
+        text?: string
+				/**
+				 * 海报状态变更目标状态 type为posterShowStatus时必传
+				 */
+        posterShowStatus?: 0 | 1
       }
     }
   }) {
@@ -565,6 +588,26 @@ class TIM {
       const likeMsg = this.createCustomMsg({
         payload: {
           data: 'like'
+        }
+      })
+      this.sendMsg(likeMsg).then(() => {
+        resolve()
+      })
+    })
+  }
+
+	/**
+	 * 创建海报状态变更消息并发送
+	 * @param status 0-关闭 1-开启
+	 */
+  setPosterShowStatus(status: 0 | 1) {
+    return new Promise((resolve) => {
+      const likeMsg = this.createCustomMsg({
+        payload: {
+          data: 'posterShowStatus',
+          extension: {
+            posterShowStatus: status
+          }
         }
       })
       this.sendMsg(likeMsg).then(() => {
