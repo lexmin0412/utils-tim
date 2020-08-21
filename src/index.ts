@@ -103,6 +103,10 @@ class TIM {
 		 * 被踢掉线时的处理
 		 */
     onKickedOut: Function
+    /**
+     * 登录失败回调
+     */
+    onLoginError: Function
   }) {
     const {
       SDKAPPID,
@@ -117,7 +121,8 @@ class TIM {
       onMessageReceived,
       groupId,
       onKickedOut,
-      toast
+      toast,
+      onLoginError
     } = config
 
     this.TIM_READY = false
@@ -158,7 +163,6 @@ class TIM {
       // 收到推送的单聊、群聊、群提示、群系统通知的新消息，可通过遍历 event.data 获取消息列表数据并渲染到页面
       // event.name - TIM.EVENT.MESSAGE_RECEIVED
       // event.data - 存储 Message 对象的数组 - [Message]
-      console.log('TIM.EVENT.MESSAGE_RECEIVED', event)
 
 			/**
 			 * 过滤字段
@@ -201,21 +205,6 @@ class TIM {
         onMessageReceived && onMessageReceived(msgList)
       }
     })
-
-    tim.on(this.TIM.EVENT.MESSAGE_REVOKED, event => {
-      // 收到消息被撤回的通知
-      // event.name - TIM.EVENT.MESSAGE_REVOKED
-      // event.data - 存储 Message 对象的数组 - [Message] - 每个 Message 对象的 isRevoked 属性值为 true
-      console.log('MESSAGE_REVOKED', event)
-    })
-
-    tim.on(this.TIM.EVENT.MESSAGE_READ_BY_PEER, event => {
-      // SDK 收到对端已读消息的通知，即已读回执。使用前需要将 SDK 版本升级至 v2.7.0 或以上。仅支持单聊会话。
-      // event.name - TIM.EVENT.MESSAGE_READ_BY_PEER
-      // event.data - event.data - 存储 Message 对象的数组 - [Message] - 每个 Message 对象的 isPeerRead 属性值为 true
-      console.log('MESSAGE_READ_BY_PEER', event)
-    })
-
     tim.on(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, event => {
       // 收到会话列表更新通知，可通过遍历 event.data 获取会话列表数据并渲染到页面
       // event.name - TIM.EVENT.CONVERSATION_LIST_UPDATED
@@ -223,21 +212,6 @@ class TIM {
       console.log('CONVERSATION_LIST_UPDATED', event)
 
       const msgList: any = []
-      // event.data.forEach(element => {
-      // 	/**
-      // 	 * 过滤消息类型 只抛出自定义消息和文本消息
-      // 	 */
-      // 	if (['TIMTextElem', 'TIMCustomElem'].includes(element.type)) {
-      // 		msgList.push({
-      // 			ID: element.ID,
-      // 			clientSequence: element.clientSequence,
-      // 			nick: element.nick,
-      // 			payload: element.payload,
-      // 			type: element.type,
-      // 		})
-      // 	}
-      // })
-
       // 过滤字段
       event.data.forEach(element => {
 				/**
@@ -272,7 +246,7 @@ class TIM {
         }
       })
 
-      console.log('CONVERSATION_LIST_UPDATED监听过滤之后的数据', msgList)
+      console.log('tim消息监听过滤完成数据', msgList)
       if (this.TIM_READY) {
         msgList &&
           msgList.length &&
@@ -291,26 +265,12 @@ class TIM {
       onGroupListUpdated && onGroupListUpdated()
     })
 
-    tim.on(this.TIM.EVENT.PROFILE_UPDATED, event => {
-      // 收到自己或好友的资料变更通知
-      // event.name - TIM.EVENT.PROFILE_UPDATED
-      // event.data - 存储 Profile 对象的数组 - [Profile]
-      console.log('PROFILE_UPDATED', event)
-    })
-
-    tim.on(this.TIM.EVENT.BLACKLIST_UPDATED, event => {
-      // 收到黑名单列表更新通知
-      // event.name - TIM.EVENT.BLACKLIST_UPDATED
-      // event.data - 存储 userID 的数组 - [userID]
-      console.log('BLACKLIST_UPDATED', event)
-    })
-
     tim.on(this.TIM.EVENT.ERROR, event => {
       // 收到 SDK 发生错误通知，可以获取错误码和错误信息
       // event.name - TIM.EVENT.ERROR
       // event.data.code - 错误码
       // event.data.message - 错误信息
-      console.log('ERROR', event)
+      console.log('TIM.EVENT.ERROR错误监听', event)
       toast.show(`聊天室错误: ${event.data.code} - ${event.data.message}`)
     })
 
@@ -351,6 +311,7 @@ class TIM {
     })
 
     // 开始登录
+    console.log('即将登录', userId, userSig)
     const promise = tim.login({userID: userId, userSig: userSig})
     promise
       .then(imResponse => {
@@ -365,7 +326,7 @@ class TIM {
         }
       })
       .catch(imError => {
-        toast.show(`TIM登录失败: ${imError}`)
+        onLoginError && onLoginError(imError)
         console.warn('login error:', imError) // 登录失败的相关信息
       })
   }
