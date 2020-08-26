@@ -472,12 +472,12 @@ class TIM {
         data: options.payload.data,
         description: `${options.payload.data} message`,
         extension: JSON.stringify({
-          ...options.payload.extension,
           nickName: this.nickName,
 					/**
 					 * 是否主播标识 true-是 false-否
 					 */
           isAnchor: false,
+          ...options.payload.extension,
         }),
       },
       conversationType: this.TIM.TYPES.CONV_GROUP,
