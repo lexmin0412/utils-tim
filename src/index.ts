@@ -1,9 +1,9 @@
-import { timLog } from './util'
+import {timLog} from './util'
 
 /**
- * 消息类型 buying-购买消息 guiding-讲解消息 coming-来了消息 like-点赞消息 text-文本消息
+ * 消息类型 buying-购买消息 guiding-讲解消息 coming-来了消息 like-点赞消息 eleVisible-元素显隐控制消息 text-文本消息
  */
-type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'posterShowStatus' | 'text'
+type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'posterShowStatus' | 'eleVisible' | 'text'
 
 class TIM {
 	/**
@@ -224,8 +224,8 @@ class TIM {
 
     /**
      * 会话列表更新监听
-     * @param callback 
-     * @param event 
+     * @param callback
+     * @param event
      */
     const onTimConversationListUpdated = (event) => {
       // 收到会话列表更新通知，可通过遍历 event.data 获取会话列表数据并渲染到页面
@@ -290,7 +290,7 @@ class TIM {
       timLog('TIM.EVENT.ERROR', event)
       toast.show(`聊天室错误: ${event.data.code} - ${event.data.message}`)
     }
-    
+
     tim.off(this.TIM.EVENT.ERROR, onTimError)
     tim.on(this.TIM.EVENT.ERROR, onTimError)
 
@@ -300,7 +300,7 @@ class TIM {
       timLog('SDK_NOT_READY', event)
       // toast.show(`聊天室初始化失败，请检查您的网络`)
     }
-    
+
     tim.off(this.TIM.EVENT.SDK_NOT_READY, onSdkNotReady)
     tim.on(this.TIM.EVENT.SDK_NOT_READY, onSdkNotReady)
 
@@ -353,7 +353,7 @@ class TIM {
       tim.off(this.TIM.EVENT.SDK_NOT_READY, onSdkNotReady)
       tim.off(this.TIM.EVENT.NET_STATE_CHANGE, onTimNetStatusChange)
     }
-    
+
     this.login({
       userId,
       userSig,
@@ -565,6 +565,14 @@ class TIM {
 				 * 海报状态变更目标状态 type为posterShowStatus时必传
 				 */
         posterShowStatus?: 0 | 1
+				/**
+				 * 元素类型 activity-活动 poster-海报
+				 */
+        eleType?: 'activity' | 'poster'
+				/**
+				 * 元素是否展示
+				 */
+        eleShow?: boolean
       }
     }
   }) {
@@ -626,6 +634,36 @@ class TIM {
           data: 'posterShowStatus',
           extension: {
             posterShowStatus: status
+          }
+        }
+      })
+      this.sendMsg(likeMsg).then(() => {
+        resolve()
+      })
+    })
+  }
+
+	/**
+	 * 创建元素显隐变更消息并发送
+	 */
+  setEleVisible(ele: {
+    /**
+     * 元素类型
+     */
+    eleType: 'activity' | 'poster'
+    /**
+     * 元素是否展示
+     */
+    eleShow: boolean
+  }) {
+    const {eleType, eleShow} = ele
+    return new Promise((resolve) => {
+      const likeMsg = this.createCustomMsg({
+        payload: {
+          data: 'eleVisible',
+          extension: {
+            eleType,
+            eleShow
           }
         }
       })
