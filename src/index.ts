@@ -330,7 +330,7 @@ class TIM {
       if (event.data.state === this.TIM.TYPES.NET_STATE_CONNECTED) {
         toast.show('网络已连接')
       } else if (event.data.state === this.TIM.TYPES.NET_STATE_CONNECTING) {
-        toast.loading('当前网络不稳定，连接中...')
+        toast.loading('连接中...')
       } else if (event.data.state === this.TIM.TYPES.NET_STATE_DISCONNECTED) {
         toast.show('当前网络不可用，请检查您的网络')
       }
