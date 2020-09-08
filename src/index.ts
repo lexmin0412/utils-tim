@@ -286,8 +286,8 @@ class TIM {
       }
     }
 
-    if (onTimConversationListUpdated) {
-      tim.off(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, onTimConversationListUpdated)
+    tim.off(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, onTimConversationListUpdated)
+    if (onConversationListUpdated) {
       tim.on(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, onTimConversationListUpdated)
     }
 
