@@ -117,6 +117,10 @@ class TIM {
      * 登录失败回调
      */
     onLoginError: Function
+    /**
+     * 收到SDK错误时的回调
+     */
+    onSDKError: Function
   }) {
     const {
       SDKAPPID,
@@ -132,7 +136,8 @@ class TIM {
       groupId,
       onKickedOut,
       toast,
-      onLoginError
+      onLoginError,
+      onSDKError
     } = config
 
     this.TIM_READY = false
@@ -288,7 +293,8 @@ class TIM {
       // event.data.code - 错误码
       // event.data.message - 错误信息
       timLog('TIM.EVENT.ERROR', event)
-      toast.show(`聊天室错误: ${event.data.code} - ${event.data.message}`)
+
+      onSDKError && onSDKError(event)
     }
 
     tim.off(this.TIM.EVENT.ERROR, onTimError)
