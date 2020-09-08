@@ -225,7 +225,9 @@ class TIM {
     }
 
     tim.off(this.TIM.EVENT.MESSAGE_RECEIVED, onTimMessageReceived)
-    tim.on(this.TIM.EVENT.MESSAGE_RECEIVED, onTimMessageReceived)
+    if (onMessageReceived) {
+      tim.on(this.TIM.EVENT.MESSAGE_RECEIVED, onTimMessageReceived)
+    }
 
     /**
      * 会话列表更新监听
@@ -284,8 +286,10 @@ class TIM {
       }
     }
 
-    tim.off(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, onTimConversationListUpdated)
-    tim.on(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, onTimConversationListUpdated)
+    if (onTimConversationListUpdated) {
+      tim.off(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, onTimConversationListUpdated)
+      tim.on(this.TIM.EVENT.CONVERSATION_LIST_UPDATED, onTimConversationListUpdated)
+    }
 
     const onTimError = (event) => {
       // 收到 SDK 发生错误通知，可以获取错误码和错误信息
