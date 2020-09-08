@@ -101,7 +101,7 @@ declare const tim_util: {
 	/**
 	 * 获取群资料
 	 */
-	getGroupFile: () => void;
+	getGroupFile: () => Promise<any>;
 
 	/**
 	 * tim初始化
@@ -181,12 +181,12 @@ declare const tim_util: {
 	/**
 	 * 加群
 	 */
-	joinGroup: () => void;
+	joinGroup: () => Promise<any>;
 
 	/**
 	 * 发送点赞消息
 	 */
-	like: () => void;
+	like: () => Promise<any>;
 
 	/**
 	 * tim登录
@@ -202,7 +202,7 @@ declare const tim_util: {
 	 * 发送消息
 	 * @message 使用createMsg创建的消息体
 	 */
-	sendMsg: (message: any) => void;
+	sendMsg: (message: any) => Promise<any>;
 
 	/**
 	 * 创建元素显隐变更消息并发送
@@ -216,12 +216,12 @@ declare const tim_util: {
 		 * 元素是否展示
 		 */
 		eleShow: boolean
-	}) => void;
+	}) => Promise<any>;
 
 	/**
 	 * 创建海报状态变更消息并发送
 	 * @param status 0-关闭 1-开启
 	 */
-	setPosterShowStatus: (status: 0 | 1) => void;
+	setPosterShowStatus: (status: 0 | 1) => Promise<any>;
 };
 
