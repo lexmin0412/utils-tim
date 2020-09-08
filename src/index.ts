@@ -116,7 +116,7 @@ class TIM {
     /**
      * 登录失败回调
      */
-    onLoginError: Function
+    onLoginError?: Function
     /**
      * 收到SDK错误时的回调
      */
