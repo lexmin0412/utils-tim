@@ -120,7 +120,7 @@ class TIM {
     /**
      * 收到SDK错误时的回调
      */
-    onSDKError: Function
+    onSDKError?: Function
   }) {
     const {
       SDKAPPID,

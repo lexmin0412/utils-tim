@@ -96,7 +96,7 @@ declare const tim_util: {
 			}
 		}
 	}) => void;
-	
+
 	/**
 	 * 创建文本消息
 	 */
@@ -184,7 +184,7 @@ declare const tim_util: {
 		/**
 		 * 收到SDK错误时的回调
 		 */
-		onSDKError: Function
+		onSDKError?: Function
 	}) => void;
 
 	/**
