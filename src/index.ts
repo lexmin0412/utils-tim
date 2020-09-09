@@ -583,6 +583,10 @@ class TIM {
 				 * 元素是否展示
 				 */
         eleShow?: boolean
+        /**
+         * 是否主播标识
+         */
+        isAnchor?: boolean
       }
     }
   }) {

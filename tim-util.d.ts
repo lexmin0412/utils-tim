@@ -10,6 +10,11 @@ export = tim_util;
 declare const tim_util: {
 
 	/**
+	 * 销毁tim实例 取消所有事件监听
+	 */
+	destroyTimInstance: Function
+
+	/**
 	 * 创建自定义消息
 	 */
 	createCustomMsg: (options: {
@@ -45,6 +50,10 @@ declare const tim_util: {
 				 * 元素是否展示
 				 */
 				eleShow?: boolean
+        /**
+         * 是否主播标识
+         */
+				isAnchor?: boolean
 			}
 		}
 	}) => void;
@@ -127,7 +136,7 @@ declare const tim_util: {
 		/**
 		 * tim sdk appid
 		 */
-		SDKAPPID: number
+		SDKAPPID: string
 		/**
 		 * TIM Sdk
 		 */
