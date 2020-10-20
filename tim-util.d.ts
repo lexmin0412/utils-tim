@@ -50,9 +50,9 @@ declare const tim_util: {
 				 * 元素是否展示
 				 */
 				eleShow?: boolean
-        /**
-         * 是否主播标识
-         */
+				/**
+				 * 是否主播标识
+				 */
 				isAnchor?: boolean
 			}
 		}
@@ -117,6 +117,12 @@ declare const tim_util: {
 	 */
 	init: (config: {
 		/**
+		 * tim插件
+		 */
+		TIM_PLUGINS: {
+			[key: string]: any
+		}
+		/**
 		 * toast类
 		 */
 		toast: {
@@ -141,10 +147,6 @@ declare const tim_util: {
 		 * TIM Sdk
 		 */
 		TIM_SDK: any
-		/**
-		 * cos sdk
-		 */
-		COS: any
 		/**
 		 * 直播聊天室群组id
 		 */

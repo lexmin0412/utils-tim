@@ -77,10 +77,12 @@ class TIM {
 		 * TIM Sdk
 		 */
     TIM_SDK: any
-		/**
-		 * cos sdk
-		 */
-    COS: any
+    /**
+     * tim插件
+     */
+    TIM_PLUGINS: {
+      [key: string]: any
+    }
 		/**
 		 * 直播聊天室群组id
 		 */
@@ -125,7 +127,7 @@ class TIM {
     const {
       SDKAPPID,
       TIM_SDK,
-      COS,
+      TIM_PLUGINS,
       nickName,
       userId,
       userSig,
@@ -161,7 +163,7 @@ class TIM {
     // tim.setLogLevel(1); // release 级别，SDK 输出关键信息，生产环境时建议使用
 
     // 注册 COS SDK 插件
-    tim.registerPlugin({'cos-wx-sdk': COS})
+    tim.registerPlugin(TIM_PLUGINS)
 
     const onTimSDKReady = (event) => {
       // 收到离线消息和会话列表同步完毕通知，接入侧可以调用 sendMessage 等需要鉴权的接口
