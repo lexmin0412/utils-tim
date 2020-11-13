@@ -234,5 +234,28 @@ declare const tim_util: {
 	 * @param status 0-关闭 1-开启
 	 */
 	setPosterShowStatus: (status: 0 | 1) => Promise<any>;
+
+	/**
+	 * 发送端对端自定义消息
+	 */
+	sendC2CCustomMsg: (params: {
+		/**
+		 * 目标id
+		 */
+		toUserId: string;
+		/**
+		 * 消息体
+		 */
+		msg: {
+			/**
+			 * 类型 
+			 */
+			data: IMsgType;
+			/**
+			 * 扩展字段
+			 */
+			extension?: any
+		}
+	}) => Promise<any>
 };
 

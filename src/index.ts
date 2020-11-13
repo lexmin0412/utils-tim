@@ -688,6 +688,36 @@ class TIM {
       })
     })
   }
+
+  /**
+   * 发送端对端自定义消息
+   */
+  sendC2CCustomMsg(params: {
+    toUserId: string;
+    msg: {
+      data: IMsgType;
+      extension?: any
+    }
+  }): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const {toUserId, msg} = params
+      const message = this.tim.createCustomMessage({
+        to: toUserId,
+        conversationType: this.TIM.TYPES.CONV_C2C,
+        payload: {
+          data: msg.data,
+          extension: JSON.stringify(msg.extension)
+        }
+      })
+      this.sendMsg(message).then(() => {
+        timLog('连麦消息发送成功')
+        resolve()
+      }).catch(err => {
+        timLog('连麦消息发送失败', err)
+        reject(err)
+      })
+    })
+  }
 }
 
 export default new TIM()
