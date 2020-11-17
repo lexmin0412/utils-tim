@@ -18,6 +18,10 @@ class TIM {
 	 * TIM是否初始化完成
 	 */
   TIM_READY: boolean
+  /**
+   * 用户userId
+   */
+  userId: string
 	/**
 	 * 昵称
 	 */
@@ -144,6 +148,7 @@ class TIM {
 
     this.TIM_READY = false
     this.nickName = nickName
+    this.userId = userId
     this.toast = toast
 
     timLog('即将初始化')
@@ -250,6 +255,7 @@ class TIM {
          */
         if (element.lastMessage.type === 'TIMCustomElem') {
           msgList.push({
+            type: element.type,
             groupProfile: element.groupProfile || null,
             lastMessage: {
               ...element.lastMessage,
@@ -263,6 +269,7 @@ class TIM {
           const textSplitRes = element.lastMessage.payload.text.split('m&=&m')
           timLog('分割结果', textSplitRes)
           msgList.push({
+            type: element.type,
             groupProfile: element.groupProfile || null,
             lastMessage: {
               ...element.lastMessage,
