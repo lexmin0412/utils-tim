@@ -1,4 +1,7 @@
-import {timLog} from './util'
+import {
+  timLog,
+  picSthFromObj
+} from './util'
 
 /**
  * 消息类型 buying-购买消息 guiding-讲解消息 coming-来了消息 like-点赞消息 eleVisible-元素显隐控制消息 text-文本消息
@@ -6,29 +9,29 @@ import {timLog} from './util'
 type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'posterShowStatus' | 'eleVisible' | 'text'
 
 class TIM {
-	/**
-	 * tim实例
-	 */
+  /**
+   * tim实例
+   */
   tim: any
-	/**
-	 * TIM sdk
-	 */
+  /**
+   * TIM sdk
+   */
   TIM: any
-	/**
-	 * TIM是否初始化完成
-	 */
+  /**
+   * TIM是否初始化完成
+   */
   TIM_READY: boolean
   /**
    * 用户userId
    */
   userId: string
-	/**
-	 * 昵称
-	 */
+  /**
+   * 昵称
+   */
   nickName: string
-	/**
-	 * 群组id
-	 */
+  /**
+   * 群组id
+   */
   groupId: string
   /**
    * 取消订阅
@@ -38,48 +41,48 @@ class TIM {
    * 销毁当前实例 取消所有订阅
    */
   destroyTimInstance: Function
-	/**
-	 * toast类
-	 */
+  /**
+   * toast类
+   */
   toast: {
-		/**
-		 * text 错误提示
-		 */
+    /**
+     * text 错误提示
+     */
     show: (text: string) => void
-		/**
-		 * text 加载提示文字
-		 */
+    /**
+     * text 加载提示文字
+     */
     loading: (text: string) => void
   }
-	/**
-	 * 初始化
-	 * @param config 配置对象
-	 */
+  /**
+   * 初始化
+   * @param config 配置对象
+   */
   init(config: {
-		/**
-		 * toast类
-		 */
+    /**
+     * toast类
+     */
     toast: {
-			/**
-			 * text 错误提示
-			 */
+      /**
+       * text 错误提示
+       */
       show: (text: string) => void
-			/**
-			 * text 加载提示文字
-			 */
+      /**
+       * text 加载提示文字
+       */
       loading: (text: string) => void
     }
-		/**
-		 * 用户昵称
-		 */
+    /**
+     * 用户昵称
+     */
     nickName: string
-		/**
-		 * tim sdk appid
-		 */
+    /**
+     * tim sdk appid
+     */
     SDKAPPID: number
-		/**
-		 * TIM Sdk
-		 */
+    /**
+     * TIM Sdk
+     */
     TIM_SDK: any
     /**
      * tim插件
@@ -87,37 +90,37 @@ class TIM {
     TIM_PLUGINS: {
       [key: string]: any
     }
-		/**
-		 * 直播聊天室群组id
-		 */
+    /**
+     * 直播聊天室群组id
+     */
     groupId: string
-		/**
-		 * 用户id
-		 */
+    /**
+     * 用户id
+     */
     userId: string
-		/**
-		 * 用户sig
-		 */
+    /**
+     * 用户sig
+     */
     userSig: string
-		/**
-		 * 初始化成功回调
-		 */
+    /**
+     * 初始化成功回调
+     */
     onReady: Function
-		/**
-		 * 收到消息回调
-		 */
+    /**
+     * 收到消息回调
+     */
     onConversationListUpdated?: Function
-		/**
-		 * 群组列表更新回调
-		 */
+    /**
+     * 群组列表更新回调
+     */
     onGroupListUpdated?: Function
-		/**
-		 * 收到新消息回调
-		 */
+    /**
+     * 收到新消息回调
+     */
     onMessageReceived?: Function
-		/**
-		 * 被踢掉线时的处理
-		 */
+    /**
+     * 被踢掉线时的处理
+     */
     onKickedOut: Function
     /**
      * 登录失败回调
@@ -185,6 +188,7 @@ class TIM {
     tim.on(this.TIM.EVENT.SDK_READY, onTimSDKReady)
 
     const onTimMessageReceived = (event) => {
+      timLog('收到新消息', event)
       // 收到推送的单聊、群聊、群提示、群系统通知的新消息，可通过遍历 event.data 获取消息列表数据并渲染到页面
       // event.name - TIM.EVENT.MESSAGE_RECEIVED
       // event.data - 存储 Message 对象的数组 - [Message]
@@ -194,35 +198,48 @@ class TIM {
        */
       const msgList: any = []
       event.data.forEach(element => {
-        /**
-         * 过滤消息类型 只抛出自定义消息和文本消息
-         */
-        if (['TIMCustomElem'].includes(element.type)) {
-          msgList.push({
-            ID: element.ID,
-            clientSequence: element.clientSequence,
-            nick: element.nick,
-            payload: {
-              ...element.payload,
-              extension: JSON.parse(element.payload.extension),
-            },
-            type: element.type,
-          })
-        } else if (element.type === 'TIMTextElem') {
-          const textSplitRes = element.payload.text.split('m&=&m')
-          msgList.push({
-            ID: element.ID,
-            clientSequence: element.clientSequence,
-            nick: element.nick,
-            payload: {
-              ...element.payload,
-              extension: {
-                text: textSplitRes[1],
-                nickName: textSplitRes[0],
-              },
-            },
-            type: element.type,
-          })
+        // 只有接收到的消息才抛出
+        if (element.flow === 'in') {
+          /**
+           * 过滤消息类型 只抛出自定义消息和文本消息
+           */
+          if (['TIMCustomElem'].includes(element.type)) {
+            const msgBody = {
+              ...picSthFromObj(element, [
+                'ID',
+                'clientSequence',
+                'nick',
+                'type',
+                'from',
+                'to'
+              ]),
+              payload: {
+                ...element.payload,
+                extension: JSON.parse(element.payload.extension)
+              }
+            }
+            msgList.push(msgBody)
+          } else if (element.type === 'TIMTextElem') {
+            const textSplitRes = element.payload.text.split('m&=&m')
+            const msgBody = {
+              ...picSthFromObj(element, [
+                'ID',
+                'clientSequence',
+                'nick',
+                'type',
+                'from',
+                'to'
+              ]),
+              payload: {
+                ...element.payload,
+                extension: {
+                  text: textSplitRes[1],
+                  nickName: textSplitRes[0]
+                }
+              }
+            }
+            msgList.push(msgBody)
+          }
         }
       })
 
@@ -408,9 +425,9 @@ class TIM {
       })
   }
 
-	/**
-	 * 加入群
-	 */
+  /**
+   * 加入群
+   */
   joinGroup() {
     return new Promise((resolve, reject) => {
       // const { groupId } = params
@@ -446,9 +463,9 @@ class TIM {
     })
   }
 
-	/**
-	 * 获取群组详细资料
-	 */
+  /**
+   * 获取群组详细资料
+   */
   getGroupFile() {
     // const { groupId } = params
     return new Promise((resolve, reject) => {
@@ -467,40 +484,40 @@ class TIM {
     })
   }
 
-	/**
-	 * 创建消息
-	 */
+  /**
+   * 创建消息
+   */
   createMsg(params: {
-		/**
-		 * 类型 text-文本消息
-		 */
+    /**
+     * 类型 text-文本消息
+     */
     type: 'text' | 'custom'
-		/**
-		 * 消息配置
-		 */
+    /**
+     * 消息配置
+     */
     options: {
-			/**
-			 * 消息优先级 可选
-			 *  // 消息优先级，用于群聊（v2.4.2起支持）。如果某个群的消息超过了频率限制，后台会优先下发高优先级的消息，详细请参考：https://cloud.tencent.com/document/product/269/3663#.E6.B6.88.E6.81.AF.E4.BC.98.E5.85.88.E7.BA.A7.E4.B8.8E.E9.A2.91.E7.8E.87.E6.8E.A7.E5.88.B6)
-			 *	// 支持的枚举值：TIM.TYPES.MSG_PRIORITY_HIGH, TIM.TYPES.MSG_PRIORITY_NORMAL（默认）, TIM.TYPES.MSG_PRIORITY_LOW, TIM.TYPES.MSG_PRIORITY_LOWEST
-			 *	// priority: TIM.TYPES.MSG_PRIORITY_NORMAL
-			 */
+      /**
+       * 消息优先级 可选
+       *  // 消息优先级，用于群聊（v2.4.2起支持）。如果某个群的消息超过了频率限制，后台会优先下发高优先级的消息，详细请参考：https://cloud.tencent.com/document/product/269/3663#.E6.B6.88.E6.81.AF.E4.BC.98.E5.85.88.E7.BA.A7.E4.B8.8E.E9.A2.91.E7.8E.87.E6.8E.A7.E5.88.B6)
+       *	// 支持的枚举值：TIM.TYPES.MSG_PRIORITY_HIGH, TIM.TYPES.MSG_PRIORITY_NORMAL（默认）, TIM.TYPES.MSG_PRIORITY_LOW, TIM.TYPES.MSG_PRIORITY_LOWEST
+       *	// priority: TIM.TYPES.MSG_PRIORITY_NORMAL
+       */
       priority?: string
-			/**
-			 * 消息内容的容器
-			 */
+      /**
+       * 消息内容的容器
+       */
       payload: {
-				/**
-				 * 消息文本内容 可选 type为text时必传
-				 */
+        /**
+         * 消息文本内容 可选 type为text时必传
+         */
         text?: string
-				/**
-				 * 自定义消息类型 可选 type为custom时必传
-				 */
+        /**
+         * 自定义消息类型 可选 type为custom时必传
+         */
         data?: IMsgType
-				/**
-				 * 自定义消息详细数据 可选 type为custom时必传
-				 */
+        /**
+         * 自定义消息详细数据 可选 type为custom时必传
+         */
         extension?: any
       }
     }
@@ -524,9 +541,9 @@ class TIM {
         description: `${options.payload.data} message`,
         extension: JSON.stringify({
           nickName: this.nickName,
-					/**
-					 * 是否主播标识 true-是 false-否
-					 */
+          /**
+           * 是否主播标识 true-是 false-否
+           */
           isAnchor: false,
           ...options.payload.extension,
         }),
@@ -535,13 +552,13 @@ class TIM {
     })
   }
 
-	/**
-	 * 创建文本消息
-	 */
+  /**
+   * 创建文本消息
+   */
   createTextMsg(options: {
-		/**
-		 * 消息文本内容
-		 */
+    /**
+     * 消息文本内容
+     */
     text: string
   }) {
     const {text} = options
@@ -556,41 +573,41 @@ class TIM {
     })
   }
 
-	/**
-	 * 创建自定义消息
-	 */
+  /**
+   * 创建自定义消息
+   */
   createCustomMsg(options: {
-		/**
-		 * 消息内容的容器
-		 */
+    /**
+     * 消息内容的容器
+     */
     payload: {
-			/**
-			 * 自定义消息类型
-			 */
+      /**
+       * 自定义消息类型
+       */
       data: IMsgType
-			/**
-			 * 自定义扩展字段
-			 */
+      /**
+       * 自定义扩展字段
+       */
       extension?: {
-				/**
-				 * 商品信息对象 type为guiding时必传
-				 */
+        /**
+         * 商品信息对象 type为guiding时必传
+         */
         goodsInfo?: any
-				/**
-				 * 文本内容 type为text时必传
-				 */
+        /**
+         * 文本内容 type为text时必传
+         */
         text?: string
-				/**
-				 * 海报状态变更目标状态 type为posterShowStatus时必传
-				 */
+        /**
+         * 海报状态变更目标状态 type为posterShowStatus时必传
+         */
         posterShowStatus?: 0 | 1
-				/**
-				 * 元素类型 activity-活动 poster-海报
-				 */
+        /**
+         * 元素类型 activity-活动 poster-海报
+         */
         eleType?: 'activity' | 'poster'
-				/**
-				 * 元素是否展示
-				 */
+        /**
+         * 元素是否展示
+         */
         eleShow?: boolean
         /**
          * 是否主播标识
@@ -608,9 +625,9 @@ class TIM {
     })
   }
 
-	/**
-	 * 发送消息
-	 */
+  /**
+   * 发送消息
+   */
   sendMsg(message) {
     return new Promise((resolve, reject) => {
       const promise = this.tim.sendMessage(message)
@@ -628,9 +645,9 @@ class TIM {
     })
   }
 
-	/**
-	 * 创建点赞消息并发送
-	 */
+  /**
+   * 创建点赞消息并发送
+   */
   like() {
     return new Promise((resolve, reject) => {
       const likeMsg = this.createCustomMsg({
@@ -646,10 +663,10 @@ class TIM {
     })
   }
 
-	/**
-	 * 创建海报状态变更消息并发送
-	 * @param status 0-关闭 1-开启
-	 */
+  /**
+   * 创建海报状态变更消息并发送
+   * @param status 0-关闭 1-开启
+   */
   setPosterShowStatus(status: 0 | 1) {
     return new Promise((resolve) => {
       const likeMsg = this.createCustomMsg({
@@ -666,9 +683,9 @@ class TIM {
     })
   }
 
-	/**
-	 * 创建元素显隐变更消息并发送
-	 */
+  /**
+   * 创建元素显隐变更消息并发送
+   */
   setEleVisible(ele: {
     /**
      * 元素类型
