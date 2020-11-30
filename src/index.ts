@@ -734,10 +734,39 @@ class TIM {
         }
       })
       this.sendMsg(message).then(() => {
-        timLog('连麦消息发送成功')
+        timLog('端对端自定义消息发送成功')
         resolve()
       }).catch(err => {
-        timLog('连麦消息发送失败', err)
+        timLog('端对端自定义消息发送失败', err)
+        reject(err)
+      })
+    })
+  }
+
+  /**
+   * 发送群自定义消息
+   */
+  sendGroupCustomMsg(params: {
+    msg: {
+      data: IMsgType;
+      extension?: any
+    }
+  }): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const { msg } = params
+      const message = this.tim.createCustomMessage({
+        to: this.groupId,
+        conversationType: this.TIM.TYPES.CONV_GROUP,
+        payload: {
+          data: msg.data,
+          extension: JSON.stringify(msg.extension)
+        }
+      })
+      this.sendMsg(message).then(() => {
+        timLog('群消息发送成功')
+        resolve()
+      }).catch(err => {
+        timLog('群消息发送失败', err)
         reject(err)
       })
     })

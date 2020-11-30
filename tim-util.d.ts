@@ -54,6 +54,10 @@ declare const tim_util: {
 				 * 是否主播标识
 				 */
 				isAnchor?: boolean
+				/**
+				 * 任意属性
+				 */
+				[key: string]: any
 			}
 		}
 	}) => void;
@@ -243,6 +247,25 @@ declare const tim_util: {
 		 * 目标id
 		 */
 		toUserId: string;
+		/**
+		 * 消息体
+		 */
+		msg: {
+			/**
+			 * 类型 
+			 */
+			data: IMsgType;
+			/**
+			 * 扩展字段
+			 */
+			extension?: any
+		}
+	}) => Promise<any>
+
+	/**
+	 * 发送群自定义消息
+	 */
+	sendGroupCustomMsg: (params: {
 		/**
 		 * 消息体
 		 */
