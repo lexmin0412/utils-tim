@@ -722,12 +722,17 @@ class TIM {
       data: IMsgType;
       extension?: any
     }
+    /**
+     * 优先级 预留参数，为后续开发提供基础
+     */
+    priority?: string
   }): Promise<any> {
     return new Promise((resolve, reject) => {
       const {toUserId, msg} = params
       const message = this.tim.createCustomMessage({
         to: toUserId,
         conversationType: this.TIM.TYPES.CONV_C2C,
+        priority: this.TIM.TYPES.MSG_PRIORITY_HIGH,
         payload: {
           data: msg.data,
           extension: JSON.stringify(msg.extension)
@@ -751,12 +756,17 @@ class TIM {
       data: IMsgType;
       extension?: any
     }
+    /**
+     * 优先级 预留参数，为后续开发提供基础
+     */
+    priority?: string
   }): Promise<any> {
     return new Promise((resolve, reject) => {
       const { msg } = params
       const message = this.tim.createCustomMessage({
         to: this.groupId,
         conversationType: this.TIM.TYPES.CONV_GROUP,
+        priority: this.TIM.TYPES.MSG_PRIORITY_HIGH,
         payload: {
           data: msg.data,
           extension: JSON.stringify(msg.extension)
