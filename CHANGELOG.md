@@ -2,6 +2,10 @@
 
 ## 0.0.23(2020-11-30)
 
+- 【优化】API sendC2CCustomMsg, sendGroupCustomMsg 发送的消息设置优先级为高
+
+## 0.0.22(2020-11-30)
+
 - 【新增】自定义消息类型新增 switch（开关切换类型）
 - 【新增】API sendC2CCustomMsg, sendGroupCustomMsg
 
