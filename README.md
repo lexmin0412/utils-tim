@@ -171,3 +171,61 @@ TimUtil.sendMsg(msg)
 	this.onSendMsgError(err)
 })
 ```
+
+### sendC2CCustomMsg
+
+发送端对端自定义消息。
+
+#### 参数
+
+##### Object Object
+
+| 属性 | 类型   | 默认值 | 必填 | 说明     |
+|------|--------|--------|------|----------|
+| toUserId | string | 无     | 是   | 目标用户IM userId |
+| msg | object object | 无     | 是   | 消息体 |
+
+```ts
+TimUtil.sendC2CCustomMsg({
+	toUserId: '',  // 目标userId
+	msg: {
+		data: 'linkmic',  // 消息类型
+		extension: {      // 自定义扩展字段
+			type: 'respond',
+			action: 'reject',
+			msgDirection: 'c2a', 
+			userNickName: '',
+			userId: '',
+		},
+	},
+})
+```
+
+### sendGroupCustomMsg
+
+发送群自定义消息。
+
+#### 参数
+
+##### Object Object
+
+| 属性     | 类型          | 默认值 | 必填 | 说明              |
+|----------|---------------|--------|------|-------------------|
+| toGroupId | string        | 无     | 是   | IM groupId |
+| msg      | object object | 无     | 是   | 消息体            |
+
+```ts
+TimUtil.sendC2CCustomMsg({
+	toGroupId: '',    // 群id
+	msg: {
+		data: 'linkmic',  // 自定义消息类型
+		extension: {      // 自定义扩展字段
+			type: 'respond',
+			action: 'reject',
+			msgDirection: 'c2a',
+			userNickName: '',
+			userId: '',
+		},
+	},
+})
+```

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.0.23(2020-11-30)
+
+- 【新增】自定义消息类型新增 switch（开关切换类型）
+- 【新增】API sendC2CCustomMsg, sendGroupCustomMsg
+
 ## 0.0.21(2020-11-23)
 
 - 【优化】onMessageReceived逻辑优化
