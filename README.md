@@ -2,6 +2,10 @@
 
 基于腾讯即时通信IM的工具类封装。
 
+## 更新日志
+
+[点击前往](https://github.com/lexmin0412/tim-util/blob/master/CHANGELOG.md)
+
 ## API
 
 ### init
@@ -229,3 +233,4 @@ TimUtil.sendC2CCustomMsg({
 	},
 })
 ```
+
