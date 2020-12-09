@@ -3,7 +3,7 @@
 /**
  * 消息类型 buying-购买消息 guiding-讲解消息 coming-来了消息 like-点赞消息 eleVisible-元素显隐控制消息 text-文本消息 linkmic-连麦消息 switch-开关
  */
-type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'posterShowStatus' | 'eleVisible' | 'text' | 'linkmic' | 'switch'
+type IMsgType = 'buying' | 'guiding' | 'coming' | 'like' | 'posterShowStatus' | 'eleVisible' | 'text' | 'linkmic' | 'switch' | 'redpacket' | string
 
 export = tim_util;
 
