@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.0.24(2020-12-09)
+
+- 【新增】自定义消息类型新增 redpacket(红包)，并扩展类型为 string, 后续可不再补充
+- 【调整】加群后修改打印信息为整个返回体，加群成功后打印userId
+
 ## 0.0.23(2020-11-30)
 
 - 【优化】API sendC2CCustomMsg, sendGroupCustomMsg 发送的消息设置优先级为高
