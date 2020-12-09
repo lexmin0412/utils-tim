@@ -438,13 +438,14 @@ class TIM {
       })
       promise
         .then(imResponse => {
+          console.log('加群申请结果', imResponse.data)
           switch (imResponse.data.status) {
             case this.TIM.TYPES.JOIN_STATUS_WAIT_APPROVAL: // 等待管理员同意
               timLog('等待管理员同意')
               reject('加群失败')
               break
             case this.TIM.TYPES.JOIN_STATUS_SUCCESS: // 加群成功
-              timLog('加群成功', imResponse.data.group) // 加入的群组资料
+              timLog('加群成功, userId', this.userId)
               resolve()
               break
             case this.TIM.TYPES.JOIN_STATUS_ALREADY_IN_GROUP: // 已经在群中
