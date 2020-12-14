@@ -1,5 +1,5 @@
 {
-  "name": "tim-util",
+  "name": "utils-tim",
   "version": "0.0.24",
   "description": "腾讯TIM即时聊天工具类消息相关封装",
   "main": "dist/index.js",
